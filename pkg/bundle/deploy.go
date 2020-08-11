@@ -599,7 +599,7 @@ spec:
     storage: true
 `
 
-const Sha256_deploy_crds_noobaa_io_noobaas_crd_yaml = "a1b3661d6614535e354be74f26896004f24236b94277fd5858b65cb57810cfe6"
+const Sha256_deploy_crds_noobaa_io_noobaas_crd_yaml = "b8f28a6407c7cd6177db3e7e0dd7187a80fc20ac452fc3f40e535b7456e8e655"
 
 const File_deploy_crds_noobaa_io_noobaas_crd_yaml = `apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -1415,6 +1415,10 @@ spec:
                     name must be unique.
                   type: string
               type: object
+            mongoDbURL:
+              description: MongoDbURL (optional) overrides the default mongo db remote
+                url
+              type: string
             pvPoolDefaultStorageClass:
               description: PVPoolDefaultStorageClass (optional) overrides the default
                 cluster StorageClass for the pv-pool volumes. This affects where the
