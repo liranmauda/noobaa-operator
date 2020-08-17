@@ -3,6 +3,7 @@ package system
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 	semver "github.com/coreos/go-semver/semver"
@@ -104,7 +105,7 @@ func (r *Reconciler) CheckSystemCR() error {
 	// Set ActualImage to be updated in the noobaa status
 	r.NooBaa.Status.ActualImage = specImage
 
-	// Verfify the endpoints spec
+	// Verify the endpoints spec
 	endpointsSpec := r.NooBaa.Spec.Endpoints
 	if endpointsSpec != nil {
 		if endpointsSpec.MinCount <= 0 {
@@ -123,6 +124,15 @@ func (r *Reconciler) CheckSystemCR() error {
 				return util.NewPersistentError("InvalidEndpointsConfiguration",
 					fmt.Sprintf(`Invalid virtual host %s, not a fully qualified DNS name`, virtualHost))
 			}
+		}
+	}
+
+	// Verify the mongo url
+	if r.NooBaa.Spec.MongoDbURL != "" {
+		if !strings.Contains(r.NooBaa.Spec.MongoDbURL, "mongodb://") &&
+			!strings.Contains(r.NooBaa.Spec.MongoDbURL, "mongodb+srv://") {
+			return util.NewPersistentError("InvalidMongoDbURL",
+				fmt.Sprintf(`Invalid mongo db url %s, expecting the url to start with mongodb:// or mongodb+srv://`, r.NooBaa.Spec.MongoDbURL))
 		}
 	}
 

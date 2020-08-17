@@ -32,6 +32,13 @@ func (r *Reconciler) ReconcilePhaseCreating() error {
 		"noobaa operator started phase 2/4 - \"Creating\"",
 	)
 
+	if r.NooBaa.Spec.MongoDbURL != "" {
+		r.MongoConnectionString = r.NooBaa.Spec.MongoDbURL
+	} else {
+		r.MongoConnectionString = fmt.Sprintf(`mongodb://%s-0.%s/nbcore`,
+			r.NooBaaMongoDB.Name, r.NooBaaMongoDB.Spec.ServiceName)
+	}
+
 	if err := r.ReconcileObject(r.ServiceAccount, r.SetDesiredServiceAccount); err != nil {
 		return err
 	}
@@ -72,19 +79,22 @@ func (r *Reconciler) ReconcilePhaseCreatingForMainClusters() error {
 	if err := r.ReconcileObject(r.SecretServer, nil); err != nil {
 		return err
 	}
-	if err := r.UpgradeSplitDB(); err != nil {
-		return err
-	}
 	if err := r.ReconcileObject(r.CoreApp, r.SetDesiredCoreApp); err != nil {
 		return err
 	}
-	if err := r.ReconcileDB(); err != nil {
-		return err
+	// create the mongo db only if mongo db url is not given.
+	if r.NooBaa.Spec.MongoDbURL == "" {
+		if err := r.UpgradeSplitDB(); err != nil {
+			return err
+		}
+		if err := r.ReconcileDB(); err != nil {
+			return err
+		}
+		if err := r.ReconcileObject(r.ServiceDb, r.SetDesiredServiceDB); err != nil {
+			return err
+		}
 	}
 	if err := r.ReconcileObject(r.ServiceMgmt, r.SetDesiredServiceMgmt); err != nil {
-		return err
-	}
-	if err := r.ReconcileObject(r.ServiceDb, r.SetDesiredServiceDB); err != nil {
 		return err
 	}
 	if err := r.ReconcileObjectOptional(r.RouteMgmt, nil); err != nil {
@@ -264,7 +274,7 @@ func (r *Reconciler) SetDesiredCoreApp() error {
 					c.Env[j].Value = r.SetDesiredAgentProfile(c.Env[j].Value)
 
 				case "MONGODB_URL":
-					c.Env[j].Value = "mongodb://" + r.NooBaaMongoDB.Name + "-0." + r.NooBaaMongoDB.Spec.ServiceName + "/nbcore"
+					c.Env[j].Value = r.MongoConnectionString
 
 				case "POSTGRES_HOST":
 					c.Env[j].Value = r.NooBaaPostgresDB.Name + "-0." + r.NooBaaPostgresDB.Spec.ServiceName

@@ -289,8 +289,7 @@ func (r *Reconciler) SetDesiredDeploymentEndpoint() error {
 					}
 				case "MONGODB_URL":
 					if r.JoinSecret == nil {
-						c.Env[j].Value = fmt.Sprintf(`mongodb://%s-0.%s/nbcore`,
-							r.NooBaaMongoDB.Name, r.NooBaaMongoDB.Spec.ServiceName)
+						c.Env[j].Value = r.MongoConnectionString
 					}
 				case "LOCAL_MD_SERVER":
 					if r.JoinSecret == nil {
