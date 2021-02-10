@@ -150,6 +150,10 @@ func LoadSystemDefaults() *nbv1.NooBaa {
 		sc := options.DBStorageClass
 		sys.Spec.DBStorageClass = &sc
 	}
+	if options.MongoDbURL != "" {
+		mongoDbURL := options.MongoDbURL
+		sys.Spec.MongoDbURL = mongoDbURL
+	}
 	if options.PVPoolDefaultStorageClass != "" {
 		sc := options.PVPoolDefaultStorageClass
 		sys.Spec.PVPoolDefaultStorageClass = &sc
