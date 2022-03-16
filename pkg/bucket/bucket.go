@@ -38,6 +38,20 @@ func CmdCreate() *cobra.Command {
 	return cmd
 }
 
+// CmdExport returns a CLI command
+func CmdExport() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "export <bucket-name>",
+		Short: "Create a NooBaa NSFS bucket and export the given path",
+		Run:   RunExport,
+	}
+	cmd.Flags().String(
+		"path", "",
+		`The path that we want to export`,
+	)
+	return cmd
+}
+
 // CmdDelete returns a CLI command
 func CmdDelete() *cobra.Command {
 	cmd := &cobra.Command{
@@ -78,6 +92,33 @@ func RunCreate(cmd *cobra.Command, args []string) {
 	bucketName := args[0]
 	nbClient := system.GetNBClient()
 
+	bucketClass, err := bucketclass.GetDefaultBucketClass(options.Namespace)
+	if err != nil {
+		log.Fatal(fmt.Errorf("Failed to get default bucketclass with error: %v", err))
+	}
+
+	tierName, err := bucketclass.CreateTieringStructure(*bucketClass, bucketName, nbClient)
+	if err != nil {
+		log.Fatal(fmt.Errorf("CreateTieringStructure for PlacementPolicy failed to create policy %q with error: %v", tierName, err))
+	}
+
+	err = nbClient.CreateBucketAPI(nb.CreateBucketParams{Name: bucketName, Tiering: tierName})
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// RunExport runs a CLI command.
+//LMLM: (change the text) The default backingstore will be used as the underlying storage for buckets created using the CLI
+func RunExport(cmd *cobra.Command, args []string) {
+	log := util.Logger()
+	if len(args) != 1 || args[0] == "" {
+		log.Fatalf(`Missing expected arguments: <bucket-name> %s`, cmd.UsageString())
+	}
+	bucketName := args[0]
+	nbClient := system.GetNBClient()
+
+	path := util.GetFlagStringOrPromptPassword(cmd, "path")
 	bucketClass, err := bucketclass.GetDefaultBucketClass(options.Namespace)
 	if err != nil {
 		log.Fatal(fmt.Errorf("Failed to get default bucketclass with error: %v", err))
