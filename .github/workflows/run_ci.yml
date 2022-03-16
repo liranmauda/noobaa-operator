@@ -40,4 +40,6 @@ jobs:
 
       - name: Run Test OLM
         id: run-test-olm
-        run: sudo make test-olm || exit 1
+        run: |
+          go version
+          sudo make test-olm || exit 1
