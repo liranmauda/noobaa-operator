@@ -40,4 +40,4 @@ jobs:
 
       - name: Run Test OLM
         id: run-test-olm
-        run: sudo env "PATH=$PATH" make test-olm || exit 1
+        run: make test-olm || exit 1
