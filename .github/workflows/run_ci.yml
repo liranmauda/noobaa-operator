@@ -42,4 +42,4 @@ jobs:
         id: run-test-olm
         run: |
           go version
-          sudo make test-olm || exit 1
+          sudo make gen-olm || exit 1
