@@ -42,4 +42,4 @@ jobs:
         id: run-test-olm
         run: |
           go version
-          make test-olm || exit 1
+          sudo env "PATH=$PATH" make test-olm || exit 1
