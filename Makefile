@@ -63,6 +63,7 @@ dev-image: $(OPERATOR_SDK) gen
 .PHONY: dev-image
 
 vendor:
+	go version
 	go mod tidy
 	go mod vendor
 	@echo "✅ vendor"
