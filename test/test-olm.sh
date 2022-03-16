@@ -15,6 +15,7 @@ then
 fi
 
 CATALOG_IMAGE=$1
+OPERATOR_SDK=$2
 VERSION=$(go run cmd/version/main.go)
 
 if [ -z "${OPERATOR_SDK}" ]; then

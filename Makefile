@@ -192,7 +192,7 @@ test-core-config-map-flow:
 
 # test-olm runs tests for the OLM package
 test-olm: $(OPERATOR_SDK) gen-olm
-	$(TIME) sudo ./test/test-olm.sh $(CATALOG_IMAGE)
+	$(TIME) sudo ./test/test-olm.sh $(CATALOG_IMAGE) $(OPERATOR_SDK)
 	@echo "✅ test-olm"
 .PHONY: test-olm
 
