@@ -4885,7 +4885,7 @@ s3 ls s3://first.bucket
 ` + "`" + `` + "`" + `` + "`" + `
 `
 
-const Sha256_deploy_olm_noobaa_operator_clusterserviceversion_yaml = "b9bb7c35dacebb254fddffe38f7d2f79021605207ebe9fa7ac621fd780abc577"
+const Sha256_deploy_olm_noobaa_operator_clusterserviceversion_yaml = "08b9c54f3bb38a93751ff5e2205cec74520358fb8ede56eb7a4da0e2f42a972c"
 
 const File_deploy_olm_noobaa_operator_clusterserviceversion_yaml = `apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
@@ -4905,7 +4905,7 @@ metadata:
 spec:
   displayName: NooBaa Operator
   version: "999.999.999-placeholder"
-  minKubeVersion: 1.16.0
+  minKubeVersion: 1.22.0
   maturity: alpha
   provider:
     name: NooBaa
