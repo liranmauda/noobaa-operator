@@ -96,6 +96,7 @@ release: release-docker release-cli
 .PHONY: release
 
 $(OPERATOR_SDK):
+	@echo "✅ LMLM start of $(OPERATOR_SDK)"
 	bash build/install-operator-sdk.sh
 	@echo "✅ $(OPERATOR_SDK)"
 
