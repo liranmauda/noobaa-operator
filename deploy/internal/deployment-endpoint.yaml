@@ -43,6 +43,10 @@ spec:
           secret:
             secretName: noobaa-endpoints
             optional: true
+        - name: noobaa-server
+          secret:
+            secretName: noobaa-server
+            optional: true   
       containers:
         - name: endpoint
           image: NOOBAA_CORE_IMAGE
@@ -93,7 +97,6 @@ spec:
             - name: ENDPOINT_GROUP_ID
             - name: LOCAL_MD_SERVER
             - name: LOCAL_N2N_AGENT
-            - name: JWT_SECRET
             - name: NOOBAA_ROOT_SECRET
             - name: NODE_EXTRA_CA_CERTS
             - name: CONTAINER_CPU_REQUEST
@@ -123,6 +126,9 @@ spec:
               readOnly: true
             - name: noobaa-auth-token
               mountPath: /etc/noobaa-auth-token
+              readOnly: true
+            - name: noobaa-server
+              mountPath: /etc/noobaa-server
               readOnly: true
             # used for aws sts endpoint type
             - name: oidc-token
