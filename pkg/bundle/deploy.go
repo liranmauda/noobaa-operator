@@ -3227,7 +3227,7 @@ data:
           su postgres -c "bash -x /usr/bin/run-postgresql"
 `
 
-const Sha256_deploy_internal_deployment_endpoint_yaml = "e2f7a049793e8f36151d349aefdc40c5a17d4de950bbcfd022ee2a4c07b9a067"
+const Sha256_deploy_internal_deployment_endpoint_yaml = "11c7b06db5897dffb2d5622df1660662847fca52380ad1ec5011be01e79dead6"
 
 const File_deploy_internal_deployment_endpoint_yaml = `apiVersion: apps/v1
 kind: Deployment
@@ -3270,6 +3270,10 @@ spec:
                 path: oidc-token
                 expirationSeconds: 3600
                 audience: api
+        - name: noobaa-auth-token
+          secret:
+            secretName: noobaa-endpoints
+            optional: true
       containers:
         - name: endpoint
           image: NOOBAA_CORE_IMAGE
@@ -3323,11 +3327,6 @@ spec:
             - name: JWT_SECRET
             - name: NOOBAA_ROOT_SECRET
             - name: NODE_EXTRA_CA_CERTS
-            - name: NOOBAA_AUTH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: noobaa-endpoints
-                  key: auth_token
             - name: CONTAINER_CPU_REQUEST
               valueFrom:
                 resourceFieldRef:
@@ -3352,6 +3351,9 @@ spec:
               readOnly: true
             - name: s3-secret
               mountPath: /etc/s3-secret
+              readOnly: true
+            - name: noobaa-auth-token
+              mountPath: /etc/noobaa-auth-token
               readOnly: true
             # used for aws sts endpoint type
             - name: oidc-token
