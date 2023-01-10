@@ -4159,7 +4159,7 @@ spec:
           storage: 50Gi
 `
 
-const Sha256_deploy_internal_statefulset_postgres_db_yaml = "98abe98cd3089424ef5a7dcebd973b1c307f879d434872029b58c0be392b2756"
+const Sha256_deploy_internal_statefulset_postgres_db_yaml = "a5d3bcac456c334377e3082af2249a3c7caeb8075c589381af4c528dd99977ed"
 
 const File_deploy_internal_statefulset_postgres_db_yaml = `apiVersion: apps/v1
 kind: StatefulSet
@@ -4208,16 +4208,16 @@ spec:
             value: nbcore
           - name: LC_COLLATE
             value: C
-          - name: POSTGRESQL_USER
-            valueFrom:
-              secretKeyRef:
-                key: user
-                name: noobaa-db
-          - name: POSTGRESQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: password
-                name: noobaa-db
+          # - name: POSTGRESQL_USER
+          #   valueFrom:
+          #     secretKeyRef:
+          #       key: user
+          #       name: noobaa-db
+          # - name: POSTGRESQL_PASSWORD
+          #   valueFrom:
+          #     secretKeyRef:
+          #       key: password
+          #       name: noobaa-db
         command:
         - sh
         - -x
@@ -4237,6 +4237,14 @@ spec:
           mountPath: /var/lib/pgsql
         - name: noobaa-postgres-initdb-sh-volume
           mountPath: /init
+        - name: noobaa-db
+          mountPath: /etc/noobaa-db
+          readOnly: true
+        volumes:
+        - name: noobaa-db
+          secret:
+            secretName: noobaa-db
+            optional: true    
       containers:
       #--------------------#
       # Postgres CONTAINER #
@@ -4248,16 +4256,16 @@ spec:
             value: nbcore
           - name: LC_COLLATE
             value: C
-          - name: POSTGRESQL_USER
-            valueFrom:
-              secretKeyRef:
-                key: user
-                name: noobaa-db
-          - name: POSTGRESQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: password
-                name: noobaa-db
+          # - name: POSTGRESQL_USER
+          #   valueFrom:
+          #     secretKeyRef:
+          #       key: user
+          #       name: noobaa-db
+          # - name: POSTGRESQL_PASSWORD
+          #   valueFrom:
+          #     secretKeyRef:
+          #       key: password
+          #       name: noobaa-db
         imagePullPolicy: "IfNotPresent"
         ports:
           - containerPort: 5432
@@ -4275,6 +4283,9 @@ spec:
             mountPath: /opt/app-root/src/postgresql-cfg
           - name: noobaa-postgres-initdb-sh-volume
             mountPath: /init
+          - name: noobaa-db
+            mountPath: /etc/noobaa-db
+            readOnly: true
       volumes:
       - name: noobaa-postgres-config-volume
         configMap:
@@ -4282,6 +4293,10 @@ spec:
       - name: noobaa-postgres-initdb-sh-volume
         configMap:
           name: noobaa-postgres-initdb-sh
+      - name: noobaa-db
+        secret:
+          secretName: noobaa-db
+          optional: true    
       securityContext: 
         runAsUser: 10001
         runAsGroup: 0

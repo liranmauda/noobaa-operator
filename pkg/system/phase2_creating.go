@@ -401,34 +401,34 @@ func (r *Reconciler) setDesiredCoreEnv(c *corev1.Container) {
 			if r.OAuthEndpoints != nil {
 				c.Env[j].Value = r.OAuthEndpoints.TokenEndpoint
 			}
-		case "POSTGRES_USER":
-			if r.NooBaa.Spec.DBType == "postgres" {
-				if c.Env[j].Value != "" {
-					c.Env[j].Value = ""
-				}
-				c.Env[j].ValueFrom = &corev1.EnvVarSource{
-					SecretKeyRef: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: r.SecretDB.Name,
-						},
-						Key: "user",
-					},
-				}
-			}
-		case "POSTGRES_PASSWORD":
-			if r.NooBaa.Spec.DBType == "postgres" {
-				if c.Env[j].Value != "" {
-					c.Env[j].Value = ""
-				}
-				c.Env[j].ValueFrom = &corev1.EnvVarSource{
-					SecretKeyRef: &corev1.SecretKeySelector{
-						LocalObjectReference: corev1.LocalObjectReference{
-							Name: r.SecretDB.Name,
-						},
-						Key: "password",
-					},
-				}
-			}
+		// case "POSTGRES_USER": LMLM
+		// 	if r.NooBaa.Spec.DBType == "postgres" {
+		// 		if c.Env[j].Value != "" {
+		// 			c.Env[j].Value = ""
+		// 		}
+		// 		c.Env[j].ValueFrom = &corev1.EnvVarSource{
+		// 			SecretKeyRef: &corev1.SecretKeySelector{
+		// 				LocalObjectReference: corev1.LocalObjectReference{
+		// 					Name: r.SecretDB.Name,
+		// 				},
+		// 				Key: "user",
+		// 			},
+		// 		}
+		// 	}
+		// case "POSTGRES_PASSWORD":
+		// 	if r.NooBaa.Spec.DBType == "postgres" {
+		// 		if c.Env[j].Value != "" {
+		// 			c.Env[j].Value = ""
+		// 		}
+		// 		c.Env[j].ValueFrom = &corev1.EnvVarSource{
+		// 			SecretKeyRef: &corev1.SecretKeySelector{
+		// 				LocalObjectReference: corev1.LocalObjectReference{
+		// 					Name: r.SecretDB.Name,
+		// 				},
+		// 				Key: "password",
+		// 			},
+		// 		}
+		// 	}
 		case "NOOBAA_ROOT_SECRET":
 			c.Env[j].Value = r.SecretRootMasterKey
 		case "NODE_EXTRA_CA_CERTS":

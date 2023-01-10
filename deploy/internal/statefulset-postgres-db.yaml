@@ -45,16 +45,16 @@ spec:
             value: nbcore
           - name: LC_COLLATE
             value: C
-          - name: POSTGRESQL_USER
-            valueFrom:
-              secretKeyRef:
-                key: user
-                name: noobaa-db
-          - name: POSTGRESQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: password
-                name: noobaa-db
+          # - name: POSTGRESQL_USER
+          #   valueFrom:
+          #     secretKeyRef:
+          #       key: user
+          #       name: noobaa-db
+          # - name: POSTGRESQL_PASSWORD
+          #   valueFrom:
+          #     secretKeyRef:
+          #       key: password
+          #       name: noobaa-db
         command:
         - sh
         - -x
@@ -74,6 +74,14 @@ spec:
           mountPath: /var/lib/pgsql
         - name: noobaa-postgres-initdb-sh-volume
           mountPath: /init
+        - name: noobaa-db
+          mountPath: /etc/noobaa-db
+          readOnly: true
+        volumes:
+        - name: noobaa-db
+          secret:
+            secretName: noobaa-db
+            optional: true    
       containers:
       #--------------------#
       # Postgres CONTAINER #
@@ -85,16 +93,16 @@ spec:
             value: nbcore
           - name: LC_COLLATE
             value: C
-          - name: POSTGRESQL_USER
-            valueFrom:
-              secretKeyRef:
-                key: user
-                name: noobaa-db
-          - name: POSTGRESQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: password
-                name: noobaa-db
+          # - name: POSTGRESQL_USER
+          #   valueFrom:
+          #     secretKeyRef:
+          #       key: user
+          #       name: noobaa-db
+          # - name: POSTGRESQL_PASSWORD
+          #   valueFrom:
+          #     secretKeyRef:
+          #       key: password
+          #       name: noobaa-db
         imagePullPolicy: "IfNotPresent"
         ports:
           - containerPort: 5432
@@ -112,6 +120,9 @@ spec:
             mountPath: /opt/app-root/src/postgresql-cfg
           - name: noobaa-postgres-initdb-sh-volume
             mountPath: /init
+          - name: noobaa-db
+            mountPath: /etc/noobaa-db
+            readOnly: true
       volumes:
       - name: noobaa-postgres-config-volume
         configMap:
@@ -119,6 +130,10 @@ spec:
       - name: noobaa-postgres-initdb-sh-volume
         configMap:
           name: noobaa-postgres-initdb-sh
+      - name: noobaa-db
+        secret:
+          secretName: noobaa-db
+          optional: true    
       securityContext: 
         runAsUser: 10001
         runAsGroup: 0
