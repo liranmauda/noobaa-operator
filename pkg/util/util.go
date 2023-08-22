@@ -204,7 +204,7 @@ func GetKubeVersion() (*semver.Version, error) {
 }
 
 // MapperProvider creates RESTMapper
-func MapperProvider(config *rest.Config) (meta.RESTMapper, error) {
+func MapperProvider(config *rest.Config, httpClient *http.Client) (meta.RESTMapper, error) {
 	return meta.NewLazyRESTMapperLoader(func() (meta.RESTMapper, error) {
 		dc, err := discovery.NewDiscoveryClientForConfig(config)
 		if err != nil {
@@ -238,7 +238,7 @@ func MapperProvider(config *rest.Config) (meta.RESTMapper, error) {
 func KubeClient() client.Client {
 	if lazyClient == nil {
 		config := KubeConfig()
-		mapper, _ := MapperProvider(config)
+		mapper, _ := MapperProvider(config, nil)
 		var err error
 		lazyClient, err = client.New(config, client.Options{Mapper: mapper, Scheme: scheme.Scheme})
 		if err != nil {
@@ -434,8 +434,8 @@ func KubeDelete(obj client.Object, opts ...client.DeleteOption) bool {
 	}
 
 	time.Sleep(10 * time.Millisecond)
-
-	err = wait.PollImmediateInfinite(time.Second, func() (bool, error) {
+	
+	err = wait.PollUntilContextCancel(ctx, time.Second, true, func(ctx context.Context) (bool, error) {
 		err := klient.Delete(ctx, obj, opts...)
 		if err == nil {
 			if !deleted {
