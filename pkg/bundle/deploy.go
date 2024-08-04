@@ -4326,7 +4326,7 @@ spec:
       storage: 30Gi
 `
 
-const Sha256_deploy_internal_pod_agent_yaml = "a02ebca336c7db9e4b84a13459e30664fd8fd2a8ea238e188685caea52a281fd"
+const Sha256_deploy_internal_pod_agent_yaml = "0daa27faeb09b2e9af027865f7d4708c24860d1f745c6d200887760a75205e77"
 
 const File_deploy_internal_pod_agent_yaml = `apiVersion: v1
 kind: Pod
@@ -4352,6 +4352,11 @@ spec:
         - name: CONTAINER_PLATFORM
           value: KUBERNETES
         - name: AGENT_CONFIG
+        - name: NOOBAA_LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: noobaa-config
+              key: NOOBAA_LOG_LEVEL
       command: ["/noobaa_init_files/noobaa_init.sh", "agent"]
       # Insert the relevant image for the agent
       ports:
