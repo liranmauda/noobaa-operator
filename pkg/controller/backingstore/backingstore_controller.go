@@ -79,6 +79,10 @@ func Add(mgr manager.Manager) error {
 	if err != nil {
 		return err
 	}
+	err = c.Watch(source.Kind(mgr.GetCache(), &corev1.ConfigMap{}), ownerHandler, &filterForOwnerPredicate, &logEventsPredicate)
+	if err != nil {
+		return err
+	}
 
 	// setting another handler to watch events on secrets that not necessarily owned by the Backingstore.
 	// only one OwnerReference can be a controller see:

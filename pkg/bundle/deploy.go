@@ -4326,7 +4326,7 @@ spec:
       storage: 30Gi
 `
 
-const Sha256_deploy_internal_pod_agent_yaml = "0daa27faeb09b2e9af027865f7d4708c24860d1f745c6d200887760a75205e77"
+const Sha256_deploy_internal_pod_agent_yaml = "5678bb71534f804dd0a58f7f67544fba51c88ca91fe4033f23b96cc9ee38123f"
 
 const File_deploy_internal_pod_agent_yaml = `apiVersion: v1
 kind: Pod
@@ -4334,6 +4334,8 @@ metadata:
   labels:
     app: noobaa
   name: noobaa-agent
+  annotations:
+    NOOBAA_LOG_LEVEL: ""
 spec:
   containers:
     - name: noobaa-agent

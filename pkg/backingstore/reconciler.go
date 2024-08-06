@@ -81,6 +81,7 @@ type Reconciler struct {
 	PodAgentTemplate *corev1.Pod
 	PvcAgentTemplate *corev1.PersistentVolumeClaim
 	ServiceAccount   *corev1.ServiceAccount
+	CoreAppConfig    *corev1.ConfigMap
 
 	SystemInfo             *nb.SystemInfo
 	ExternalConnectionInfo *nb.ExternalConnectionInfo
@@ -1100,6 +1101,8 @@ func (r *Reconciler) reconcileExistingPods(podsList *corev1.PodList) error {
 		// check if pod need to be updated and deleted
 		if r.needUpdate(&pod) {
 			util.KubeDelete(&pod)
+		} else if r.CoreAppConfig.Data["NOOBAA_LOG_LEVEL"] != r.BackingStore.Annotations["NOOBAA_LOG_LEVEL"] {
+			r.BackingStore.Annotations["NOOBAA_LOG_LEVEL"] = r.CoreAppConfig.Data["NOOBAA_LOG_LEVEL"]
 		} else if !r.isPodinNoobaa(&pod) {
 			noneAttachingAgents++
 			if time.Since(pod.CreationTimestamp.Time) > 10*time.Minute {
@@ -1110,6 +1113,7 @@ func (r *Reconciler) reconcileExistingPods(podsList *corev1.PodList) error {
 			}
 		}
 	}
+
 	if len(podsList.Items) < r.BackingStore.Spec.PVPool.NumVolumes {
 		return fmt.Errorf("BackingStore Still didn't start all the pods. %d from %d has started",
 			len(podsList.Items), r.BackingStore.Spec.PVPool.NumVolumes)
@@ -1124,6 +1128,7 @@ func (r *Reconciler) reconcileExistingPods(podsList *corev1.PodList) error {
 		return fmt.Errorf("BackingStore Still didn't connect all requested pods. %d from %d are pending",
 			noneAttachingAgents, r.BackingStore.Spec.PVPool.NumVolumes)
 	}
+
 	return nil
 }
 
@@ -1307,6 +1312,10 @@ func (r *Reconciler) updatePodTemplate() error {
 		}
 		r.PodAgentTemplate.Spec.TopologySpreadConstraints = []corev1.TopologySpreadConstraint{topologySpreadConstraint}
 	}
+
+	// setting the BackingStore NOOBAA_LOG_LEVEL annotation to be the same as the config map
+	// We will do that as we need to know what will be the env variable value, and if it changes.
+	r.BackingStore.Annotations["NOOBAA_LOG_LEVEL"] = r.CoreAppConfig.Data["NOOBAA_LOG_LEVEL"]
 
 	return r.updatePodResourcesTemplate(c)
 }
