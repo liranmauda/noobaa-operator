@@ -50,6 +50,12 @@ func Add(mgr manager.Manager) error {
 		Scheme:    mgr.GetScheme(),
 	}
 
+	// Predicate that filter events that noobaa is not their owner
+	filterForNoobaaOwnerPredicate := util.FilterForOwner{
+		OwnerType: &nbv1.NooBaa{},
+		Scheme:    mgr.GetScheme(),
+	}
+
 	// Predicate that allows events that only change spec, labels or finalizers and will log any allowed events
 	// This will stop infinite reconciles that triggered by status or irrelevant metadata changes
 	backingStorePredicate := util.ComposePredicates(
@@ -79,7 +85,7 @@ func Add(mgr manager.Manager) error {
 	if err != nil {
 		return err
 	}
-	err = c.Watch(source.Kind(mgr.GetCache(), &corev1.ConfigMap{}), ownerHandler, &filterForOwnerPredicate, &logEventsPredicate)
+	err = c.Watch(source.Kind(mgr.GetCache(), &corev1.ConfigMap{}), ownerHandler, &filterForNoobaaOwnerPredicate, &logEventsPredicate)
 	if err != nil {
 		return err
 	}

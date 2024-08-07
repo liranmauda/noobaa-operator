@@ -4,8 +4,6 @@ metadata:
   labels:
     app: noobaa
   name: noobaa-agent
-  annotations:
-    NOOBAA_LOG_LEVEL: ""
 spec:
   containers:
     - name: noobaa-agent

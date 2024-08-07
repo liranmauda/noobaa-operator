@@ -119,6 +119,7 @@ func NewReconciler(
 		NooBaa:           util.KubeObject(bundle.File_deploy_crds_noobaa_io_v1alpha1_noobaa_cr_yaml).(*nbv1.NooBaa),
 		Secret:           util.KubeObject(bundle.File_deploy_internal_secret_empty_yaml).(*corev1.Secret),
 		ServiceAccount:   util.KubeObject(bundle.File_deploy_service_account_yaml).(*corev1.ServiceAccount),
+		CoreAppConfig:    util.KubeObject(bundle.File_deploy_internal_configmap_empty_yaml).(*corev1.ConfigMap),
 		PodAgentTemplate: util.KubeObject(bundle.File_deploy_internal_pod_agent_yaml).(*corev1.Pod),
 		PvcAgentTemplate: util.KubeObject(bundle.File_deploy_internal_pvc_agent_yaml).(*corev1.PersistentVolumeClaim),
 	}
@@ -1095,14 +1096,13 @@ func (r *Reconciler) reconcileMissingPods(podsList *corev1.PodList, pvcsList *co
 }
 
 func (r *Reconciler) reconcileExistingPods(podsList *corev1.PodList) error {
+	r.Logger.Info("LMLM reconcileExistingPods :)") 
 	noneAttachingAgents := 0
 	failedAttachingAgents := 0
 	for _, pod := range podsList.Items {
 		// check if pod need to be updated and deleted
 		if r.needUpdate(&pod) {
 			util.KubeDelete(&pod)
-		} else if r.CoreAppConfig.Data["NOOBAA_LOG_LEVEL"] != r.BackingStore.Annotations["NOOBAA_LOG_LEVEL"] {
-			r.BackingStore.Annotations["NOOBAA_LOG_LEVEL"] = r.CoreAppConfig.Data["NOOBAA_LOG_LEVEL"]
 		} else if !r.isPodinNoobaa(&pod) {
 			noneAttachingAgents++
 			if time.Since(pod.CreationTimestamp.Time) > 10*time.Minute {
@@ -1157,6 +1157,9 @@ func (r *Reconciler) needUpdateResources(c *corev1.Container) bool {
 
 func (r *Reconciler) needUpdate(pod *corev1.Pod) bool {
 	var c = &pod.Spec.Containers[0]
+	var configMapLogLevel = r.CoreAppConfig.Data["NOOBAA_LOG_LEVEL"]
+	r.Logger.Info("LMLM configMapLogLevel (%s)", configMapLogLevel)
+	
 	for _, name := range []string{"HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY"} {
 		envVar := util.GetEnvVariable(&c.Env, name)
 		val, ok := os.LookupEnv(name)
@@ -1165,6 +1168,16 @@ func (r *Reconciler) needUpdate(pod *corev1.Pod) bool {
 			return true
 		}
 	}
+
+	// getting the NOOBAA_LOG_LEVEL from the pod env and compering to the config map 
+	// if they are not the same then we need to update.
+	var podEnvValue = util.GetEnvVariable(&c.Env, "NOOBAA_LOG_LEVEL")
+	r.Logger.Info("LMLM podEnvValue (%v)", podEnvValue)
+	if podEnvValue.Value != configMapLogLevel {
+		r.Logger.Warnf("NOOBAA_LOG_LEVEL Env value (%v) and ConfigMap value (%s) are different.", podEnvValue, configMapLogLevel)
+		return true
+	}
+
 	if c.Image != r.NooBaa.Status.ActualImage {
 		r.Logger.Warnf("Change in Image detected: current image(%v) noobaa image(%v)", c.Image, r.NooBaa.Status.ActualImage)
 		return true
@@ -1312,10 +1325,6 @@ func (r *Reconciler) updatePodTemplate() error {
 		}
 		r.PodAgentTemplate.Spec.TopologySpreadConstraints = []corev1.TopologySpreadConstraint{topologySpreadConstraint}
 	}
-
-	// setting the BackingStore NOOBAA_LOG_LEVEL annotation to be the same as the config map
-	// We will do that as we need to know what will be the env variable value, and if it changes.
-	r.BackingStore.Annotations["NOOBAA_LOG_LEVEL"] = r.CoreAppConfig.Data["NOOBAA_LOG_LEVEL"]
 
 	return r.updatePodResourcesTemplate(c)
 }
