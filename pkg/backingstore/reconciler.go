@@ -646,14 +646,22 @@ func (r *Reconciler) ReadSystemInfo() error {
 		}
 	}
 
-	// Reuse an existing connection if match is found
+	// Reuse an existing connection if match is found.
+	// EndpointType and Identity are checked first so that EndpointsEquivalent is
+	// only called for candidates that could plausibly match, avoiding errors from
+	// unrelated connections with malformed endpoint URLs.
 	for i := range r.SystemInfo.Accounts {
 		account := &r.SystemInfo.Accounts[i]
 		for j := range account.ExternalConnections.Connections {
 			c := &account.ExternalConnections.Connections[j]
-			if c.EndpointType == conn.EndpointType &&
-				c.Endpoint == conn.Endpoint &&
-				c.Identity == string(conn.Identity) {
+			if c.EndpointType != conn.EndpointType || c.Identity != string(conn.Identity) {
+				continue
+			}
+			endpointsMatch, err := validations.EndpointsEquivalent(c.Endpoint, conn.Endpoint)
+			if err != nil {
+				return err
+			}
+			if endpointsMatch {
 				r.ExternalConnectionInfo = c
 				conn.Name = c.Name
 			}
