@@ -272,7 +272,7 @@ func (r *Reconciler) autoscaleKeda(prometheus *monitoringv1.Prometheus) error {
 		}
 
 		//create ScaledObject
-		r.KedaScaled.Spec.Triggers[0].AuthenticationRef = &kedav1alpha1.ScaledObjectAuthRef{
+		r.KedaScaled.Spec.Triggers[0].AuthenticationRef = &kedav1alpha1.AuthenticationRef{
 			Name: r.KedaTriggerAuthentication.Name,
 		}
 		prometheusURL, err := getPrometheusURL(serviceAccountName, promethesNamespace)
